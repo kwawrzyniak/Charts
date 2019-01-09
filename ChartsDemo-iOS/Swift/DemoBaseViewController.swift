@@ -45,7 +45,9 @@ enum Option {
     case toggleYLabels
     case toggleRotate
     case toggleHighlightCircle
-    
+    case toggleRoundedBarsAllCorners
+    case toggleRoundedBarsTopCorners
+
     var label: String {
         switch self {
         case .toggleValues: return "Toggle Y-Values"
@@ -59,30 +61,32 @@ enum Option {
         case .toggleAutoScaleMinMax: return "Toggle auto scale min/max"
         case .toggleData: return "Toggle Data"
         case .toggleBarBorders: return "Toggle Bar Borders"
-        // CandleChart
+            // CandleChart
         case .toggleShadowColorSameAsCandle: return "Toggle shadow same color"
         case .toggleShowCandleBar: return "Toggle show candle bar"
-        // CombinedChart
+            // CombinedChart
         case .toggleLineValues: return "Toggle Line Values"
         case .toggleBarValues: return "Toggle Bar Values"
         case .removeDataSet: return "Remove Random Set"
-        // CubicLineSampleFillFormatter
+            // CubicLineSampleFillFormatter
         case .toggleFilled: return "Toggle Filled"
         case .toggleCircles: return "Toggle Circles"
         case .toggleCubic: return "Toggle Cubic"
         case .toggleHorizontalCubic: return "Toggle Horizontal Cubic"
         case .toggleStepped: return "Toggle Stepped"
-        // HalfPieChartController
+            // HalfPieChartController
         case .toggleXValues: return "Toggle X-Values"
         case .togglePercent: return "Toggle Percent"
         case .toggleHole: return "Toggle Hole"
         case .spin: return "Spin"
         case .drawCenter: return "Draw CenterText"
-        // RadarChart
+            // RadarChart
         case .toggleXLabels: return "Toggle X-Labels"
         case .toggleYLabels: return "Toggle Y-Labels"
         case .toggleRotate: return "Toggle Rotate"
         case .toggleHighlightCircle: return "Toggle highlight circle"
+        case .toggleRoundedBarsAllCorners: return "All Corners Rounded"
+        case .toggleRoundedBarsTopCorners: return "Top Corners Rounded"
         }
     }
 }
@@ -90,32 +94,32 @@ enum Option {
 class DemoBaseViewController: UIViewController, ChartViewDelegate {
     private var optionsTableView: UITableView? = nil
     let parties = ["Party A", "Party B", "Party C", "Party D", "Party E", "Party F",
-                   "Party G", "Party H", "Party I", "Party J", "Party K", "Party L",
-                   "Party M", "Party N", "Party O", "Party P", "Party Q", "Party R",
-                   "Party S", "Party T", "Party U", "Party V", "Party W", "Party X",
-                   "Party Y", "Party Z"]
-    
+        "Party G", "Party H", "Party I", "Party J", "Party K", "Party L",
+        "Party M", "Party N", "Party O", "Party P", "Party Q", "Party R",
+        "Party S", "Party T", "Party U", "Party V", "Party W", "Party X",
+        "Party Y", "Party Z"]
+
     @IBOutlet weak var optionsButton: UIButton!
     var options: [Option]!
-    
+
     var shouldHideData: Bool = false
-    
+
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.initialize()
     }
-    
+
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
         self.initialize()
     }
-    
+
     private func initialize() {
         self.edgesForExtendedLayout = []
     }
-    
-    func optionTapped(_ option: Option) {}
-    
+
+    func optionTapped(_ option: Option) { }
+
     func handleOption(_ option: Option, forChartView chartView: ChartViewBase) {
         switch option {
         case .toggleValues:
@@ -123,43 +127,43 @@ class DemoBaseViewController: UIViewController, ChartViewDelegate {
                 set.drawValuesEnabled = !set.drawValuesEnabled
             }
             chartView.setNeedsDisplay()
-            
+
         case .toggleIcons:
             for set in chartView.data!.dataSets {
                 set.drawIconsEnabled = !set.drawIconsEnabled
             }
             chartView.setNeedsDisplay()
-            
+
         case .toggleHighlight:
             chartView.data!.highlightEnabled = !chartView.data!.isHighlightEnabled
             chartView.setNeedsDisplay()
-            
+
         case .animateX:
             chartView.animate(xAxisDuration: 3)
-            
+
         case .animateY:
             chartView.animate(yAxisDuration: 3)
-            
+
         case .animateXY:
             chartView.animate(xAxisDuration: 3, yAxisDuration: 3)
-            
+
         case .saveToGallery:
             UIImageWriteToSavedPhotosAlbum(chartView.getChartImage(transparent: false)!, nil, nil, nil)
-            
+
         case .togglePinchZoom:
             let barLineChart = chartView as! BarLineChartViewBase
             barLineChart.pinchZoomEnabled = !barLineChart.pinchZoomEnabled
             chartView.setNeedsDisplay()
-            
+
         case .toggleAutoScaleMinMax:
             let barLineChart = chartView as! BarLineChartViewBase
             barLineChart.autoScaleMinMaxEnabled = !barLineChart.isAutoScaleMinMaxEnabled
             chartView.notifyDataSetChanged()
-            
+
         case .toggleData:
             shouldHideData = !shouldHideData
             updateChartData()
-            
+
         case .toggleBarBorders:
             for set in chartView.data!.dataSets {
                 if let set = set as? BarChartDataSet {
@@ -167,29 +171,33 @@ class DemoBaseViewController: UIViewController, ChartViewDelegate {
                 }
             }
             chartView.setNeedsDisplay()
+        case .toggleRoundedBarsAllCorners:
+            (chartView as? BarChartView)?.drawRoundedBarEnabled = true
+            chartView.setNeedsDisplay()
+
         default:
             break
         }
     }
-    
+
     @IBAction func optionsButtonTapped(_ sender: Any) {
         if let optionsTableView = self.optionsTableView {
             optionsTableView.removeFromSuperview()
             self.optionsTableView = nil
             return
         }
-        
+
         let optionsTableView = UITableView()
         optionsTableView.backgroundColor = UIColor(white: 0, alpha: 0.9)
         optionsTableView.delegate = self
         optionsTableView.dataSource = self
-        
+
         optionsTableView.translatesAutoresizingMaskIntoConstraints = false
-        
+
         self.optionsTableView = optionsTableView
-        
+
         var constraints = [NSLayoutConstraint]()
-        
+
         constraints.append(NSLayoutConstraint(item: optionsTableView,
                                               attribute: .leading,
                                               relatedBy: .equal,
@@ -197,7 +205,7 @@ class DemoBaseViewController: UIViewController, ChartViewDelegate {
                                               attribute: .leading,
                                               multiplier: 1,
                                               constant: 40))
-        
+
         constraints.append(NSLayoutConstraint(item: optionsTableView,
                                               attribute: .trailing,
                                               relatedBy: .equal,
@@ -205,7 +213,7 @@ class DemoBaseViewController: UIViewController, ChartViewDelegate {
                                               attribute: .trailing,
                                               multiplier: 1,
                                               constant: 0))
-        
+
         constraints.append(NSLayoutConstraint(item: optionsTableView,
                                               attribute: .top,
                                               relatedBy: .equal,
@@ -213,10 +221,10 @@ class DemoBaseViewController: UIViewController, ChartViewDelegate {
                                               attribute: .bottom,
                                               multiplier: 1,
                                               constant: 5))
-        
+
         self.view.addSubview(optionsTableView)
         constraints.forEach { $0.isActive = true }
-        
+
         let constraint = NSLayoutConstraint(item: optionsTableView,
                                             attribute: .height,
                                             relatedBy: .equal,
@@ -226,11 +234,11 @@ class DemoBaseViewController: UIViewController, ChartViewDelegate {
                                             constant: 220)
         constraint.isActive = true
     }
-    
+
     func updateChartData() {
         fatalError("updateChartData not overridden")
     }
-    
+
     func setup(pieChartView chartView: PieChartView) {
         chartView.usePercentValuesEnabled = true
         chartView.drawSlicesUnderHoleEnabled = false
@@ -238,27 +246,27 @@ class DemoBaseViewController: UIViewController, ChartViewDelegate {
         chartView.transparentCircleRadiusPercent = 0.61
         chartView.chartDescription?.enabled = false
         chartView.setExtraOffsets(left: 5, top: 10, right: 5, bottom: 5)
-        
+
         chartView.drawCenterTextEnabled = true
-        
+
         let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
         paragraphStyle.lineBreakMode = .byTruncatingTail
         paragraphStyle.alignment = .center
-        
+
         let centerText = NSMutableAttributedString(string: "Charts\nby Daniel Cohen Gindi")
-        centerText.setAttributes([.font : UIFont(name: "HelveticaNeue-Light", size: 13)!,
-                                  .paragraphStyle : paragraphStyle], range: NSRange(location: 0, length: centerText.length))
-        centerText.addAttributes([.font : UIFont(name: "HelveticaNeue-Light", size: 11)!,
-                                  .foregroundColor : UIColor.gray], range: NSRange(location: 10, length: centerText.length - 10))
-        centerText.addAttributes([.font : UIFont(name: "HelveticaNeue-Light", size: 11)!,
-                                  .foregroundColor : UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1)], range: NSRange(location: centerText.length - 19, length: 19))
+        centerText.setAttributes([.font: UIFont(name: "HelveticaNeue-Light", size: 13)!,
+                                         .paragraphStyle: paragraphStyle], range: NSRange(location: 0, length: centerText.length))
+        centerText.addAttributes([.font: UIFont(name: "HelveticaNeue-Light", size: 11)!,
+                                         .foregroundColor: UIColor.gray], range: NSRange(location: 10, length: centerText.length - 10))
+        centerText.addAttributes([.font: UIFont(name: "HelveticaNeue-Light", size: 11)!,
+                                         .foregroundColor: UIColor(red: 51 / 255, green: 181 / 255, blue: 229 / 255, alpha: 1)], range: NSRange(location: centerText.length - 19, length: 19))
         chartView.centerAttributedText = centerText;
-        
+
         chartView.drawHoleEnabled = true
         chartView.rotationAngle = 0
         chartView.rotationEnabled = true
         chartView.highlightPerTapEnabled = true
-        
+
         let l = chartView.legend
         l.horizontalAlignment = .right
         l.verticalAlignment = .top
@@ -269,23 +277,23 @@ class DemoBaseViewController: UIViewController, ChartViewDelegate {
         l.yOffset = 0
 //        chartView.legend = l
     }
-    
+
     func setup(radarChartView chartView: RadarChartView) {
         chartView.chartDescription?.enabled = false
     }
-    
+
     func setup(barLineChartView chartView: BarLineChartViewBase) {
         chartView.chartDescription?.enabled = false
-                
+
         chartView.dragEnabled = true
         chartView.setScaleEnabled(true)
         chartView.pinchZoomEnabled = false
-        
+
         // ChartYAxis *leftAxis = chartView.leftAxis;
-        
+
         let xAxis = chartView.xAxis
         xAxis.labelPosition = .bottom
-        
+
         chartView.rightAxis.enabled = false
     }
     // TODO: Cannot override from extensions
@@ -293,17 +301,17 @@ class DemoBaseViewController: UIViewController, ChartViewDelegate {
     func chartValueSelected(_ chartView: ChartViewBase, entry: ChartDataEntry, highlight: Highlight) {
         NSLog("chartValueSelected");
     }
-    
+
     func chartValueNothingSelected(_ chartView: ChartViewBase) {
         NSLog("chartValueNothingSelected");
     }
-    
+
     func chartScaled(_ chartView: ChartViewBase, scaleX: CGFloat, scaleY: CGFloat) {
-        
+
     }
-    
+
     func chartTranslated(_ chartView: ChartViewBase, dX: CGFloat, dY: CGFloat) {
-        
+
     }
 }
 
@@ -312,32 +320,32 @@ extension DemoBaseViewController: UITableViewDelegate, UITableViewDataSource {
         if optionsTableView != nil {
             return 1
         }
-        
+
         return 0
     }
-    
+
     @available(iOS 2.0, *)
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if optionsTableView != nil {
             return options.count
         }
-        
+
         return 0
-        
+
     }
-    
+
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if optionsTableView != nil {
             return 40.0;
         }
-        
+
         return 44.0;
     }
-    
+
     @available(iOS 2.0, *)
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var cell = tableView.dequeueReusableCell(withIdentifier: "Cell")
-        
+
         if cell == nil {
             cell = UITableViewCell(style: .default, reuseIdentifier: "Cell")
             cell?.backgroundView = nil
@@ -345,20 +353,20 @@ extension DemoBaseViewController: UITableViewDelegate, UITableViewDataSource {
             cell?.textLabel?.textColor = .white
         }
         cell?.textLabel?.text = self.options[indexPath.row].label
-        
+
         return cell!
     }
-    
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if optionsTableView != nil {
             tableView.deselectRow(at: indexPath, animated: true)
-            
+
             optionsTableView?.removeFromSuperview()
             self.optionsTableView = nil
-            
+
             self.optionTapped(self.options[indexPath.row])
         }
-        
+
     }
 }
 

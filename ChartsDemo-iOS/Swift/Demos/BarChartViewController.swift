@@ -31,7 +31,9 @@ class BarChartViewController: DemoBaseViewController {
                         .saveToGallery,
                         .togglePinchZoom,
                         .toggleData,
-                        .toggleBarBorders]
+                        .toggleBarBorders,
+                        .toggleRoundedBarsAllCorners,
+                        .toggleRoundedBarsTopCorners]
         
         self.setup(barLineChartView: chartView)
         
